@@ -1,6 +1,6 @@
 {
-  "exported_at": "2026-06-15T07:46:07.744Z",
-  "count": 8,
+  "exported_at": "2026-06-15T07:56:54.160Z",
+  "count": 9,
   "entries": [
     {
       "date": "2026-05-31",
@@ -105,6 +105,19 @@
       "fastingPlan": "평소",
       "condition": 4,
       "notes": "어제 고강도 하체근력운동으로 DOMS 강함 / 오늘 완전 휴식"
+    },
+    {
+      "date": "2026-06-14",
+      "glucose": "92",
+      "prevRpe": 7,
+      "prevType": "중강도",
+      "todayRpe": 2,
+      "todayType": "저강도 유산소",
+      "sleepHours": "8.5",
+      "protein": "없음",
+      "fastingPlan": "평소",
+      "condition": 2,
+      "notes": "당직근무 스턴화"
     }
   ]
 }
