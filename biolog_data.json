@@ -1,0 +1,110 @@
+{
+  "exported_at": "2026-06-15T07:46:07.744Z",
+  "count": 8,
+  "entries": [
+    {
+      "date": "2026-05-31",
+      "glucose": 105,
+      "prevRpe": 4,
+      "prevType": "저강도 유산소",
+      "todayRpe": 9,
+      "todayType": "고강도 근력",
+      "sleepHours": 9,
+      "protein": "카제인",
+      "fastingPlan": "평소",
+      "condition": 3,
+      "notes": "역도화 첫 착용 / 풀ROM 집중 / 16,560kg"
+    },
+    {
+      "date": "2026-06-01",
+      "glucose": 106,
+      "prevRpe": 9,
+      "prevType": "고강도 근력",
+      "todayRpe": 1,
+      "todayType": "휴식",
+      "sleepHours": 7,
+      "protein": "카제인",
+      "fastingPlan": "평소",
+      "condition": 4,
+      "notes": "특이사항 없음"
+    },
+    {
+      "date": "2026-06-02",
+      "glucose": 98,
+      "prevRpe": 2,
+      "prevType": "저강도 유산소",
+      "todayRpe": 7,
+      "todayType": "중강도",
+      "sleepHours": 6.5,
+      "protein": "카제인",
+      "fastingPlan": "평소",
+      "condition": 4,
+      "notes": "DOMS 매우 강력"
+    },
+    {
+      "date": "2026-06-03",
+      "glucose": 101,
+      "prevRpe": 7,
+      "prevType": "중강도",
+      "todayRpe": 4,
+      "todayType": "중강도",
+      "sleepHours": 8.5,
+      "protein": "없음",
+      "fastingPlan": "평소",
+      "condition": 4,
+      "notes": "단백질 대량 섭취"
+    },
+    {
+      "date": "2026-06-05",
+      "glucose": 102,
+      "prevRpe": 4,
+      "prevType": "저강도 유산소",
+      "todayRpe": 7,
+      "todayType": "중강도",
+      "sleepHours": 6.5,
+      "protein": "없음",
+      "fastingPlan": "평소",
+      "condition": 4,
+      "notes": "등 루틴 진행"
+    },
+    {
+      "date": "2026-06-06",
+      "glucose": 109,
+      "prevRpe": 5,
+      "prevType": "중강도",
+      "todayRpe": 9,
+      "todayType": "고강도 근력",
+      "sleepHours": 6,
+      "protein": "카제인",
+      "fastingPlan": "평소",
+      "condition": 4,
+      "notes": "데드 140kg / 스쿼트 100kg×5 / 총볼륨 15,089kg"
+    },
+    {
+      "date": "2026-06-09",
+      "glucose": 99,
+      "prevRpe": 4,
+      "prevType": "저강도 유산소",
+      "todayRpe": 6,
+      "todayType": "중강도",
+      "sleepHours": 7,
+      "protein": "유청+카제인",
+      "fastingPlan": "평소",
+      "condition": 4,
+      "notes": "리셋 주 / 5.5km 러닝 / 야간작업 후 주간수면"
+    },
+    {
+      "date": "2026-06-15",
+      "glucose": "95",
+      "prevRpe": 9,
+      "prevType": "고강도 근력",
+      "todayRpe": 2,
+      "todayType": "저강도 유산소",
+      "sleepHours": "7",
+      "protein": "유청+카제인",
+      "fastingPlan": "평소",
+      "condition": 4,
+      "notes": "어제 고강도 하체근력운동으로 DOMS 강함 / 오늘 완전 휴식"
+    }
+  ]
+}
