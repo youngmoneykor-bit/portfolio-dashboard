@@ -265,12 +265,9 @@ function App() {
               <button onClick={()=>{setForm(blank());setEditing(null);}} style={{background:"none",border:"none",cursor:"pointer",color:C.faint,fontSize:12}}>✕ 취소</button>
             </div>}
             <div style={{background:C.panel,border:`1px solid ${C.border}`,borderRadius:12,padding:16,display:"flex",flexDirection:"column",gap:14}}>
-              <F label="날짜 (아무데나 클릭해서 변경)">
-                <div onClick={()=>document.getElementById("date-input").showPicker?.()} style={{position:"relative",cursor:"pointer",background:C.bg,border:`1px solid ${C.teal}`,borderRadius:6,padding:"7px 10px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-                  <span style={{color:C.text,fontSize:14}}>{form.date}</span>
-                  <span style={{color:C.teal,fontSize:13}}>날짜 변경 ▾</span>
-                  <input id="date-input" type="date" value={form.date} onChange={e=>sf("date",e.target.value)} style={{position:"absolute",opacity:0,width:"100%",height:"100%",top:0,left:0,cursor:"pointer"}} />
-                </div>
+              <F label="날짜">
+                <input type="date" value={form.date} onChange={e=>sf("date",e.target.value)}
+                  style={{...inp, cursor:"pointer", border:`1px solid ${C.teal}`, colorScheme:"dark", width:"100%"}} />
               </F>
               <F label="공복혈당 (mg/dL)"><Num value={form.glucose} onChange={v=>sf("glucose",v)} placeholder="예) 105" min={50} max={300}/></F>
               <F label="수면 시간 (h)"><Num value={form.sleepHours} onChange={v=>sf("sleepHours",v)} placeholder="예) 7.5" min={0} max={12} step={0.5}/></F>
