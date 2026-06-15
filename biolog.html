@@ -106,7 +106,8 @@ function LineChart({ labels, datasets, yMin, yMax, refLines=[] }) {
     });
     return () => { if(chart.current) chart.current.destroy(); };
   }, [labels, datasets, yMin, yMax]);
-  return <canvas ref={ref} style={{ height:180 }} />;
+  // 고정 높이 div로 감싸야 그래프 무한 늘어남 버그 방지
+  return <div style={{ position:"relative", height:180 }}><canvas ref={ref} /></div>;
 }
 
 // ── Small Components ──────────────────────────────────
@@ -134,9 +135,12 @@ function App() {
   const [form, setForm]       = useState(blank());
   const [tab, setTab]         = useState("입력");
   const [loaded, setLoaded]   = useState(false);
-  const [editing, setEditing] = useState(null);
-  const [toast, setToast]     = useState("");
-  const fileRef = useRef(null);
+  const [editing, setEditing]     = useState(null);
+  const [toast, setToast]         = useState("");
+  const [autoHandle, setAutoHandle] = useState(null); // File System Access API handle
+  const fileRef    = useRef(null);
+  const autoRef    = useRef(null); // autoHandle을 useEffect에서 참조용
+  useEffect(() => { autoRef.current = autoHandle; }, [autoHandle]);
 
   useEffect(()=>{
     const stored=load(STORAGE_KEY);
@@ -146,7 +150,35 @@ function App() {
     setLoaded(true);
   },[]);
 
-  useEffect(()=>{ if(loaded) store(STORAGE_KEY,entries); },[entries,loaded]);
+  useEffect(()=>{
+    if(!loaded) return;
+    store(STORAGE_KEY, entries);
+    // 자동저장 파일 핸들이 있으면 즉시 덮어쓰기
+    if(autoRef.current) writeToFile(autoRef.current, entries);
+  },[entries,loaded]);
+
+  // File System Access API로 파일에 직접 쓰기
+  const writeToFile = async (handle, data) => {
+    try {
+      const writable = await handle.createWritable();
+      await writable.write(JSON.stringify({ exported_at: new Date().toISOString(), count: data.length, entries: data }, null, 2));
+      await writable.close();
+    } catch(e) { console.warn("자동저장 실패:", e); }
+  };
+
+  // 자동저장 위치 설정
+  const setupAutoSave = async () => {
+    if (!window.showSaveFilePicker) { showToast("이 브라우저는 자동저장 미지원 (Chrome 권장)"); return; }
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: "biolog_data.json",
+        types: [{ description: "JSON 파일", accept: { "application/json": [".json"] } }],
+      });
+      setAutoHandle(handle);
+      await writeToFile(handle, entries);
+      showToast("자동저장 설정 완료 — 저장할 때마다 자동으로 덮어써");
+    } catch(e) { if(e.name !== "AbortError") showToast("설정 취소됨"); }
+  };
 
   const sorted = useMemo(()=>[...entries].sort((a,b)=>a.date.localeCompare(b.date)),[entries]);
   const baseline = useMemo(()=>{
@@ -207,7 +239,10 @@ function App() {
           {sorted.length>0&&<span style={{background:C.panel2,border:`1px solid ${C.border}`,borderRadius:20,padding:"3px 10px",fontSize:11,color:C.sub}}>{sorted.length}일</span>}
           <input type="file" accept=".json" ref={fileRef} onChange={importJSON} style={{display:"none"}}/>
           <button onClick={()=>fileRef.current?.click()} style={{background:"none",border:`1px solid ${C.border}`,borderRadius:8,cursor:"pointer",color:C.sub,padding:"5px 10px",fontSize:12}}>↑ 가져오기</button>
-          <button onClick={exportJSON} style={{background:C.teal,border:"none",borderRadius:8,cursor:"pointer",color:"#0b0f14",padding:"5px 12px",fontSize:12,fontWeight:700}}>↓ 내보내기</button>
+          <button onClick={exportJSON} style={{background:"none",border:`1px solid ${C.border}`,borderRadius:8,cursor:"pointer",color:C.sub,padding:"5px 10px",fontSize:12}}>↓ 내보내기</button>
+          <button onClick={setupAutoSave} title="저장할 때마다 자동으로 파일에 덮어씀" style={{background:autoHandle?C.green:C.teal,border:"none",borderRadius:8,cursor:"pointer",color:"#0b0f14",padding:"5px 12px",fontSize:12,fontWeight:700}}>
+            {autoHandle ? "🔗 자동저장 ON" : "📁 자동저장 설정"}
+          </button>
         </div>
       </div>
 
