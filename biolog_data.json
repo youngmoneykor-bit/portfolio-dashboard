@@ -1,6 +1,6 @@
 {
-  "exported_at": "2026-06-15T07:56:54.160Z",
-  "count": 9,
+  "exported_at": "2026-06-17T06:45:24.534Z",
+  "count": 11,
   "entries": [
     {
       "date": "2026-05-31",
@@ -118,6 +118,32 @@
       "fastingPlan": "평소",
       "condition": 2,
       "notes": "당직근무 스턴화"
+    },
+    {
+      "date": "2026-06-17",
+      "glucose": "101",
+      "prevRpe": 7,
+      "prevType": "중강도",
+      "todayRpe": 3,
+      "todayType": "저강도 유산소",
+      "sleepHours": "7",
+      "protein": "유청+카제인",
+      "fastingPlan": "평소",
+      "condition": 4,
+      "notes": "특이사항 없음"
+    },
+    {
+      "date": "2026-06-16",
+      "glucose": "98",
+      "prevRpe": 2,
+      "prevType": "저강도 유산소",
+      "todayRpe": 7,
+      "todayType": "중강도",
+      "sleepHours": "6.5",
+      "protein": "유청+카제인",
+      "fastingPlan": "평소",
+      "condition": 3,
+      "notes": "DOMS 아직 강함"
     }
   ]
 }
