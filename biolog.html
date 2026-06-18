@@ -313,8 +313,8 @@ function App() {
           <input type="file" accept=".json" ref={fileRef} onChange={importJSON} style={{display:"none"}}/>
           <button onClick={()=>fileRef.current?.click()} style={{background:"none",border:`1px solid ${C.border}`,borderRadius:8,cursor:"pointer",color:C.sub,padding:"5px 10px",fontSize:12}}>↑ 가져오기</button>
           <button onClick={exportJSON} style={{background:"none",border:`1px solid ${C.border}`,borderRadius:8,cursor:"pointer",color:C.sub,padding:"5px 10px",fontSize:12}}>↓ 내보내기</button>
-          <button onClick={()=>{setShowGHSettings(true);setGhTokenInput(githubToken);}} style={{background:githubToken?(ghSaving?"#1e3a2a":C.green):"#1a1f28",border:`1px solid ${githubToken?C.green:C.border}`,borderRadius:8,cursor:"pointer",color:githubToken?C.green:C.sub,padding:"5px 12px",fontSize:12,fontWeight:700}}>
-            {ghSaving?"⏳ 저장 중...":githubToken?"☁ GitHub 연동 ON":"☁ GitHub 연동"}
+          <button onClick={()=>{setShowGHSettings(true);setGhTokenInput(githubToken);}} style={{background:githubToken?(ghSaving?"#1e3a2a":C.green):"#1a1f28",border:`1px solid ${githubToken?C.green:C.border}`,borderRadius:8,cursor:"pointer",color:githubToken?"#0b0f14":C.sub,padding:"5px 12px",fontSize:12,fontWeight:700}}>
+            {ghSaving?"⏳ 저장 중...":githubToken?"☁ 연동 ON":"☁ GitHub 연동"}
           </button>
         </div>
       </div>
