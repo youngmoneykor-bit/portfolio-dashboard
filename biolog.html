@@ -22,7 +22,11 @@
 <script type="text/babel">
 const { useState, useEffect, useMemo, useRef } = React;
 
-const STORAGE_KEY = "biolog:entries:v1";
+const STORAGE_KEY  = "biolog:entries:v1";
+const GH_TOKEN_KEY = "biolog:github:token";
+const GH_OWNER     = "youngmoneykor-bit";
+const GH_REPO      = "portfolio-dashboard";
+const GH_PATH      = "biolog_data.json";
 
 const SEED = [
   { date:"2026-05-31", glucose:105, prevRpe:4, prevType:"저강도 유산소", todayRpe:9, todayType:"고강도 근력", sleepHours:9,   protein:"카제인",    fastingPlan:"평소", condition:3, notes:"역도화 첫 착용 / 풀ROM 집중 / 16,560kg" },
@@ -137,17 +141,83 @@ function App() {
   const [loaded, setLoaded]   = useState(false);
   const [editing, setEditing]     = useState(null);
   const [toast, setToast]         = useState("");
-  const [autoHandle, setAutoHandle] = useState(null); // File System Access API handle
-  const fileRef    = useRef(null);
-  const autoRef    = useRef(null); // autoHandle을 useEffect에서 참조용
+  const [autoHandle, setAutoHandle]     = useState(null);
+  const [githubToken, setGithubToken]   = useState("");
+  const [showGHSettings, setShowGHSettings] = useState(false);
+  const [ghTokenInput, setGhTokenInput] = useState("");
+  const [ghSaving, setGhSaving]         = useState(false);
+  const fileRef = useRef(null);
+  const autoRef = useRef(null);
   useEffect(() => { autoRef.current = autoHandle; }, [autoHandle]);
 
+  // ── GitHub API 저장 ──────────────────────────────────
+  const saveToGitHub = async (data) => {
+    const token = localStorage.getItem(GH_TOKEN_KEY);
+    if(!token) return;
+    setGhSaving(true);
+    const apiUrl = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
+    try {
+      showToast("☁ GitHub 저장 중...");
+      const getRes = await fetch(apiUrl, { headers:{ Authorization:`Bearer ${token}`, Accept:"application/vnd.github.v3+json" } });
+      if(!getRes.ok) throw new Error(`파일 조회 실패 (${getRes.status})`);
+      const fileInfo = await getRes.json();
+      const sorted_d = [...data].sort((a,b)=>a.date.localeCompare(b.date));
+      const json = JSON.stringify({ exported_at:new Date().toISOString(), count:sorted_d.length, entries:sorted_d }, null, 2);
+      const encoded = btoa(unescape(encodeURIComponent(json)));
+      const putRes = await fetch(apiUrl, {
+        method:"PUT",
+        headers:{ Authorization:`Bearer ${token}`, "Content-Type":"application/json", Accept:"application/vnd.github.v3+json" },
+        body: JSON.stringify({ message:`feat: biolog update ${new Date().toISOString().slice(0,10)}`, content:encoded, sha:fileInfo.sha })
+      });
+      if(putRes.ok) showToast("✓ GitHub 자동저장 완료");
+      else { const err=await putRes.json(); showToast(`⚠ GitHub 오류: ${err.message}`); }
+    } catch(e) { showToast(`⚠ GitHub 저장 실패: ${e.message}`); }
+    finally { setGhSaving(false); }
+  };
+
+  const fetchFromGitHub = async (token) => {
+    const apiUrl = `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`;
+    try {
+      const res = await fetch(apiUrl, { headers:{ Authorization:`Bearer ${token}`, Accept:"application/vnd.github.v3+json" } });
+      if(!res.ok) return;
+      const fileInfo = await res.json();
+      const decoded = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g,""))));
+      const parsed = JSON.parse(decoded);
+      const inc = parsed.entries ?? parsed;
+      if(!Array.isArray(inc)||inc.length===0) return;
+      setEntries(prev=>{ const m=[...prev]; inc.forEach(s=>{ const i=m.findIndex(e=>e.date===s.date); i>=0?m[i]=s:m.push(s); }); return m; });
+      showToast(`☁ GitHub에서 ${inc.length}개 불러옴`);
+    } catch(e) { console.warn("GitHub 불러오기 실패:", e); }
+  };
+
+  const saveGHToken = () => {
+    const t = ghTokenInput.trim();
+    if(!t){ showToast("토큰을 입력해"); return; }
+    localStorage.setItem(GH_TOKEN_KEY, t);
+    setGithubToken(t);
+    setShowGHSettings(false);
+    setGhTokenInput("");
+    showToast("✓ GitHub 토큰 저장 완료 — 다음 저장부터 자동 반영");
+    fetchFromGitHub(t);
+  };
+
+  const removeGHToken = () => {
+    localStorage.removeItem(GH_TOKEN_KEY);
+    setGithubToken("");
+    setShowGHSettings(false);
+    showToast("GitHub 연동 해제됨");
+  };
+
+  // ── 초기 로드 ────────────────────────────────────────
   useEffect(()=>{
+    const token = localStorage.getItem(GH_TOKEN_KEY) || "";
+    setGithubToken(token);
     const stored=load(STORAGE_KEY);
     if(stored&&Array.isArray(stored)){
       const m=[...SEED]; stored.forEach(s=>{ const i=m.findIndex(e=>e.date===s.date); i>=0?m[i]=s:m.push(s); }); setEntries(m);
     } else setEntries(SEED);
     setLoaded(true);
+    if(token) fetchFromGitHub(token);
   },[]);
 
   useEffect(()=>{
@@ -198,15 +268,18 @@ function App() {
 
   const sf=(k,v)=>setForm(f=>({...f,[k]:v}));
 
-  const save=()=>{
+  const save=async()=>{
     if(!form.glucose||!form.sleepHours){alert("공복혈당과 수면시간은 필수야.");return;}
+    let newEntries;
     const i=entries.findIndex(e=>e.date===form.date);
-    if(i>=0){const u=[...entries];u[i]={...form};setEntries(u);}else setEntries(p=>[...p,{...form}]);
+    if(i>=0){newEntries=[...entries];newEntries[i]={...form};}else newEntries=[...entries,{...form}];
+    setEntries(newEntries);
     setForm(blank()); setEditing(null); setTab("분석");
+    if(githubToken) await saveToGitHub(newEntries);
   };
 
   const edit=(e)=>{ setForm({date:e.date,glucose:e.glucose??"",prevRpe:e.prevRpe??5,prevType:e.prevType??"중강도",todayRpe:e.todayRpe??5,todayType:e.todayType??"중강도",sleepHours:e.sleepHours??"",protein:e.protein??"없음",fastingPlan:e.fastingPlan??"평소",condition:e.condition??3,notes:e.notes??""}); setEditing(e.date); setTab("입력"); window.scrollTo({top:0,behavior:"smooth"}); };
-  const del=(date)=>{ if(confirm(`${date} 삭제?`)) setEntries(p=>p.filter(e=>e.date!==date)); };
+  const del=async(date)=>{ if(confirm(`${date} 삭제?`)){ const ne=entries.filter(e=>e.date!==date); setEntries(ne); if(githubToken) await saveToGitHub(ne); } };
 
   const exportJSON=()=>{
     const blob=new Blob([JSON.stringify({exported_at:new Date().toISOString(),count:sorted.length,entries:sorted},null,2)],{type:"application/json"});
@@ -243,10 +316,40 @@ function App() {
           <button onClick={setupAutoSave} title="저장할 때마다 자동으로 파일에 덮어씀" style={{background:autoHandle?C.green:C.teal,border:"none",borderRadius:8,cursor:"pointer",color:"#0b0f14",padding:"5px 12px",fontSize:12,fontWeight:700}}>
             {autoHandle ? "🔗 자동저장 ON" : "📁 자동저장 설정"}
           </button>
+          <button onClick={()=>{setShowGHSettings(true);setGhTokenInput(githubToken);}} style={{background:githubToken?(ghSaving?"#1e3a2a":C.green):"#1a1f28",border:`1px solid ${githubToken?C.green:C.border}`,borderRadius:8,cursor:"pointer",color:githubToken?C.green:C.sub,padding:"5px 12px",fontSize:12,fontWeight:700}}>
+            {ghSaving?"⏳ 저장 중...":githubToken?"☁ GitHub 연동 ON":"☁ GitHub 연동"}
+          </button>
         </div>
       </div>
 
-      {toast&&<div style={{position:"fixed",top:60,right:16,zIndex:999,background:toast.startsWith("완료")?"#0d3a1f":"#3a0f0f",border:`1px solid ${toast.startsWith("완료")?C.green:C.red}`,borderRadius:8,padding:"10px 16px",color:toast.startsWith("완료")?C.green:C.red,fontSize:13,fontWeight:600}}>{toast}</div>}
+      {toast&&<div style={{position:"fixed",top:60,right:16,zIndex:999,background:(toast.startsWith("✓")||toast.startsWith("☁"))?"#0d3a1f":"#3a0f0f",border:`1px solid ${(toast.startsWith("✓")||toast.startsWith("☁"))?C.green:C.red}`,borderRadius:8,padding:"10px 16px",color:(toast.startsWith("✓")||toast.startsWith("☁"))?C.green:C.red,fontSize:13,fontWeight:600}}>{toast}</div>}
+
+      {/* GitHub 설정 모달 */}
+      {showGHSettings&&<div style={{position:"fixed",inset:0,zIndex:1000,background:"rgba(0,0,0,0.75)",display:"flex",alignItems:"center",justifyContent:"center",padding:16}}>
+        <div style={{background:C.panel,border:`1px solid ${C.border}`,borderRadius:16,padding:24,width:"100%",maxWidth:420}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:20}}>
+            <span style={{fontWeight:800,fontSize:16}}>☁ GitHub 자동저장 연동</span>
+            <button onClick={()=>setShowGHSettings(false)} style={{background:"none",border:"none",cursor:"pointer",color:C.faint,fontSize:18}}>✕</button>
+          </div>
+          <div style={{background:"#0d1520",border:`1px solid ${C.blue}`,borderRadius:8,padding:"10px 14px",marginBottom:16,fontSize:12,color:C.sub,lineHeight:1.6}}>
+            <b style={{color:C.blue}}>Personal Access Token 발급 방법</b><br/>
+            GitHub → Settings → Developer settings<br/>→ Personal access tokens → Fine-grained tokens<br/>
+            → Repository: <b style={{color:C.text}}>portfolio-dashboard</b><br/>
+            → Permissions: <b style={{color:C.text}}>Contents → Read and Write</b>
+          </div>
+          <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:16}}>
+            <span style={{fontSize:11,color:C.sub,textTransform:"uppercase",letterSpacing:"0.08em"}}>Personal Access Token</span>
+            <input type="password" value={ghTokenInput} onChange={e=>setGhTokenInput(e.target.value)}
+              placeholder="github_pat_..." style={{...inp,fontFamily:"monospace",fontSize:12}}
+              onKeyDown={e=>e.key==="Enter"&&saveGHToken()}/>
+          </div>
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={saveGHToken} style={{flex:1,background:C.teal,border:"none",borderRadius:8,cursor:"pointer",color:"#0b0f14",padding:"10px 0",fontWeight:700,fontSize:14}}>저장 &amp; 연동</button>
+            {githubToken&&<button onClick={removeGHToken} style={{background:"none",border:`1px solid ${C.red}`,borderRadius:8,cursor:"pointer",color:C.red,padding:"10px 16px",fontSize:13}}>연동 해제</button>}
+          </div>
+          {githubToken&&<p style={{marginTop:12,fontSize:11,color:C.green,textAlign:"center"}}>✓ 현재 연동됨 — 저장 시 GitHub에 자동 커밋됩니다</p>}
+        </div>
+      </div>}
 
       {/* Tabs */}
       <div style={{display:"flex",borderBottom:`1px solid ${C.border}`,background:C.panel}}>
