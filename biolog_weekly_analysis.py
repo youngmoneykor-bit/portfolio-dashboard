@@ -27,7 +27,7 @@ def load_biolog():
 # ── Gemini API 분석 ───────────────────────────────────
 
 def analyze_with_gemini(entries):
-    import google.generativeai as genai
+    from google import genai
 
     lines = []
     for e in entries:
@@ -70,9 +70,11 @@ def analyze_with_gemini(entries):
 ⚡ 개선 포인트 1가지
 💡 다음 주 핵심 권장사항 1가지"""
 
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-    model    = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(prompt)
+    client   = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
+    response = client.models.generate_content(
+        model="gemini-2.0-flash",
+        contents=prompt
+    )
     return response.text
 
 # ── 카카오 토큰 관리 ──────────────────────────────────
