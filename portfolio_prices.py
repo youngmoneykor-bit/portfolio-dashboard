@@ -329,8 +329,16 @@ def main():
         webbrowser.open(f"file:///{out_path}")
 
     print("AI 코멘터리 생성 중...")
+    base_msg   = build_kakao_message(kr_data, us_data)
     commentary = get_ai_commentary(kr_data, us_data) if IS_CI or os.environ.get("GROQ_API_KEY") else ""
-    send_kakao(build_kakao_message(kr_data, us_data) + commentary)
+    print(f"기본 메시지 길이: {len(base_msg)}자 | 코멘터리 길이: {len(commentary)}자")
+
+    # KakaoTalk 500자 제한 대응 — 합산 초과 시 별도 메시지로 전송
+    if commentary and len(base_msg) + len(commentary) > 490:
+        send_kakao(base_msg)
+        send_kakao(commentary.strip())
+    else:
+        send_kakao(base_msg + commentary)
 
 if __name__ == "__main__":
     main()
