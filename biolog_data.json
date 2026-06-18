@@ -1,6 +1,6 @@
 {
-  "exported_at": "2026-06-17T06:45:24.534Z",
-  "count": 11,
+  "exported_at": "2026-06-18T02:17:47.309Z",
+  "count": 12,
   "entries": [
     {
       "date": "2026-05-31",
@@ -144,6 +144,19 @@
       "fastingPlan": "평소",
       "condition": 3,
       "notes": "DOMS 아직 강함"
+    },
+    {
+      "date": "2026-06-18",
+      "glucose": "94",
+      "prevRpe": 3,
+      "prevType": "저강도 유산소",
+      "todayRpe": 7,
+      "todayType": "중강도",
+      "sleepHours": "7",
+      "protein": "유청+카제인",
+      "fastingPlan": "평소",
+      "condition": 4,
+      "notes": "등 / 후면 코어 운동 진행"
     }
   ]
 }
