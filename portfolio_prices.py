@@ -31,7 +31,7 @@ KR_STOCKS = {
     "Shinhan":    "055550",
     "KB Finance": "105560",
 }
-US_STOCKS = ["SPYM", "QQQM", "SCHD", "GOOGL", "PLTR", "TSLA", "ETN", "ANET"]
+US_STOCKS = ["SPYM", "QQQM", "SCHD", "GOOGL", "PLTR", "TSLA", "ETN", "ANET", "SPCX"]
 
 today   = datetime.today()
 end     = today.strftime("%Y%m%d")
@@ -191,6 +191,48 @@ def build_kakao_message(kr_data, us_data):
         lines.append(f"  어제: ${d['prev']:.2f}  → {d['comment']}")
     return "\n".join(lines)
 
+# ── AI 코멘터리 ───────────────────────────────────────
+
+def get_ai_commentary(kr_data, us_data):
+    try:
+        from groq import Groq
+        client = Groq(api_key=os.environ["GROQ_API_KEY"])
+
+        kr_lines = []
+        for d in kr_data:
+            if d["price"] is None: continue
+            kr_lines.append(f"{d['name']}({d['ticker']}): {d['price']:,}원 {d['pct']:+.2f}% | {d['comment']}")
+
+        us_lines = []
+        for d in us_data:
+            if d["price"] is None: continue
+            us_lines.append(f"{d['ticker']}: ${d['price']:.2f} {d['pct']:+.2f}% | {d['comment']}")
+
+        prompt = f"""당신은 10년 경력의 펀드매니저입니다. 오늘 포트폴리오 데이터를 보고 VVIP 고객에게 카카오톡으로 간결한 시장 브리핑을 작성해주세요.
+
+[국내 포트폴리오]
+{chr(10).join(kr_lines)}
+
+[해외 포트폴리오]
+{chr(10).join(us_lines)}
+
+[작성 규칙]
+- 150자 이내로 매우 간결하게
+- 형식: 🎯 오늘의 포인트: (한 줄 시장 요약)
+  👀 주목: (가장 주목할 종목 1개와 이유 한 줄)
+  ⚠️ 주의: (리스크 또는 관찰 포인트 한 줄)
+- 투자 권유가 아닌 정보 제공임을 전제로"""
+
+        response = client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=300
+        )
+        return "\n\n─────────────\n" + response.choices[0].message.content
+    except Exception as e:
+        print(f"AI 코멘터리 실패 (무시하고 계속): {e}")
+        return ""
+
 # ── HTML 생성 ─────────────────────────────────────────
 
 def badge(pct):
@@ -286,7 +328,9 @@ def main():
         print(f"HTML 리포트 생성: {out_path}")
         webbrowser.open(f"file:///{out_path}")
 
-    send_kakao(build_kakao_message(kr_data, us_data))
+    print("AI 코멘터리 생성 중...")
+    commentary = get_ai_commentary(kr_data, us_data) if IS_CI or os.environ.get("GROQ_API_KEY") else ""
+    send_kakao(build_kakao_message(kr_data, us_data) + commentary)
 
 if __name__ == "__main__":
     main()
