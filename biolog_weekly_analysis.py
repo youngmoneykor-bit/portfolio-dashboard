@@ -27,7 +27,7 @@ def load_biolog():
 # ── Gemini API 분석 ───────────────────────────────────
 
 def analyze_with_gemini(entries):
-    from google import genai
+    from groq import Groq
 
     lines = []
     for e in entries:
@@ -70,12 +70,13 @@ def analyze_with_gemini(entries):
 ⚡ 개선 포인트 1가지
 💡 다음 주 핵심 권장사항 1가지"""
 
-    client   = genai.Client(api_key=os.environ["GEMINI_API_KEY"])
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=prompt
+    client   = Groq(api_key=os.environ["GROQ_API_KEY"])
+    response = client.chat.completions.create(
+        model="llama-3.3-70b-versatile",
+        messages=[{"role": "user", "content": prompt}],
+        max_tokens=600
     )
-    return response.text
+    return response.choices[0].message.content
 
 # ── 카카오 토큰 관리 ──────────────────────────────────
 
