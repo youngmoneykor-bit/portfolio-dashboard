@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portfolio & BioLog 자동화 시스템 매뉴얼 · 2026-06-18</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0d1117; font-family: -apple-system, 'Malgun Gothic', sans-serif; color: #e6edf3; padding: 32px 20px; max-width: 860px; margin: 0 auto; }
+
+  h1 { font-size: 22px; font-weight: 800; color: #58a6ff; margin-bottom: 4px; }
+  .meta { font-size: 12px; color: #8b949e; margin-bottom: 36px; }
+
+  h2 { font-size: 15px; font-weight: 700; color: #e6edf3; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  h2 .badge { font-size: 10px; padding: 2px 8px; border-radius: 20px; font-weight: 600; }
+  .badge-blue   { background:#0d2136; color:#58a6ff; border:1px solid #1f6feb; }
+  .badge-green  { background:#0d2816; color:#3fb950; border:1px solid #238636; }
+  .badge-purple { background:#1f1230; color:#a371f7; border:1px solid #6e40c9; }
+  .badge-yellow { background:#2a1f00; color:#e3b341; border:1px solid #9e6a03; }
+
+  section { margin-bottom: 40px; }
+
+  /* Flow diagram */
+  .flow-wrap { display: flex; flex-direction: column; gap: 0; }
+  .flow-row  { display: flex; align-items: stretch; gap: 0; }
+  .flow-node { border-radius: 10px; padding: 14px 18px; flex: 1; }
+  .flow-node .icon { font-size: 22px; margin-bottom: 6px; }
+  .flow-node .label { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .flow-node .desc  { font-size: 11px; color: #8b949e; line-height: 1.6; }
+  .node-trigger { background:#0d1f1f; border:1.5px solid #2dd4bf; }
+  .node-github  { background:#161b22; border:1.5px solid #30363d; }
+  .node-actions { background:#1a1f0d; border:1.5px solid #3fb950; }
+  .node-ai      { background:#1f1230; border:1.5px solid #a371f7; }
+  .node-kakao   { background:#2a1f00; border:1.5px solid #e3b341; }
+  .node-web     { background:#0d2136; border:1.5px solid #1f6feb; }
+
+  .arr { text-align: center; font-size: 20px; color: #30363d; padding: 4px 0; }
+  .arr-h { display: flex; align-items: center; justify-content: center; padding: 0 8px; color: #30363d; font-size: 18px; }
+  .gap { width: 12px; flex-shrink: 0; }
+
+  /* Step list */
+  .steps { display: flex; flex-direction: column; gap: 18px; }
+  .step  { display: flex; gap: 14px; align-items: flex-start; }
+  .step-num { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+  .num-blue   { background:#1f6feb; color:#fff; }
+  .num-green  { background:#238636; color:#fff; }
+  .num-purple { background:#6e40c9; color:#fff; }
+  .num-yellow { background:#9e6a03; color:#fff; }
+  .step-body .title { font-size: 13px; font-weight: 700; margin-bottom: 4px; }
+  .step-body .text  { font-size: 12px; color: #8b949e; line-height: 1.7; }
+
+  /* Code block */
+  pre { background:#161b22; border:1px solid #21262d; border-radius:8px; padding:14px; font-size:11px; color:#e6edf3; overflow-x:auto; margin-top:8px; line-height:1.6; }
+  code { font-family: 'Consolas', 'Courier New', monospace; }
+
+  /* Secret table */
+  table { width:100%; border-collapse:collapse; font-size:12px; }
+  th { background:#161b22; color:#8b949e; padding:8px 12px; text-align:left; border:1px solid #21262d; }
+  td { padding:8px 12px; border:1px solid #21262d; vertical-align:top; }
+  td:first-child { font-family: monospace; color: #58a6ff; white-space:nowrap; }
+
+  /* Divider */
+  hr { border:none; border-top:1px solid #21262d; margin:32px 0; }
+
+  /* Key point box */
+  .tip { background:#0d2816; border:1px solid #238636; border-radius:8px; padding:12px 16px; font-size:12px; color:#3fb950; line-height:1.7; margin-top:12px; }
+  .warn { background:#2a1200; border:1px solid #c94a00; border-radius:8px; padding:12px 16px; font-size:12px; color:#f0883e; line-height:1.7; margin-top:12px; }
+</style>
+</head>
+<body>
+
+<h1>📋 Portfolio & BioLog 자동화 시스템 매뉴얼</h1>
+<div class="meta">2026-06-18 구축 완료 &nbsp;·&nbsp; GitHub Actions + Groq AI (Llama 3.3 70B) + KakaoTalk</div>
+
+<!-- ─── 전체 구조 ─── -->
+<section>
+  <h2>🏗 전체 시스템 구조 <span class="badge badge-blue">ARCHITECTURE</span></h2>
+
+  <div class="flow-wrap">
+    <!-- Row 1: Triggers -->
+    <div class="flow-row" style="gap:12px;">
+      <div class="flow-node node-trigger">
+        <div class="icon">⏰</div>
+        <div class="label">매일 09:30 KST (월~금)</div>
+        <div class="desc">GitHub Actions cron<br><code>30 0 * * 1-5</code></div>
+      </div>
+      <div class="flow-node node-trigger">
+        <div class="icon">📱</div>
+        <div class="label">BioLog 웹 입력</div>
+        <div class="desc">biolog.html에서<br>데이터 저장 시</div>
+      </div>
+      <div class="flow-node node-trigger">
+        <div class="icon">🗓</div>
+        <div class="label">매주 일요일 07:00 KST</div>
+        <div class="desc">GitHub Actions cron<br><code>0 22 * * 6</code></div>
+      </div>
+    </div>
+
+    <div class="arr">↓</div>
+
+    <!-- Row 2: Processing -->
+    <div class="flow-row" style="gap:12px;">
+      <div class="flow-node node-actions">
+        <div class="icon">📈</div>
+        <div class="label">portfolio.yml</div>
+        <div class="desc">portfolio_prices.py 실행<br>pykrx + yfinance 수집</div>
+      </div>
+      <div class="flow-node node-web">
+        <div class="icon">☁️</div>
+        <div class="label">GitHub REST API</div>
+        <div class="desc">PUT /contents/biolog_data.json<br>PAT 인증으로 자동 커밋</div>
+      </div>
+      <div class="flow-node node-actions">
+        <div class="icon">🧬</div>
+        <div class="label">biolog_analysis.yml</div>
+        <div class="desc">biolog_weekly_analysis.py<br>최근 7일 데이터 분석</div>
+      </div>
+    </div>
+
+    <div class="arr">↓</div>
+
+    <!-- Row 3: AI -->
+    <div class="flow-node node-ai" style="text-align:center; padding:16px;">
+      <div class="icon">🤖</div>
+      <div class="label">Groq API — Llama 3.3 70B Versatile (무료)</div>
+      <div class="desc">주식 코멘터리 생성 (150자) &nbsp;·&nbsp; BioLog 주간 리포트 생성 (400자)<br>대사질환·운동생리학 전문가 프롬프트 탑재</div>
+    </div>
+
+    <div class="arr">↓</div>
+
+    <!-- Row 4: Output -->
+    <div class="flow-node node-kakao" style="text-align:center;">
+      <div class="icon">💬</div>
+      <div class="label">KakaoTalk 자동 전송</div>
+      <div class="desc">나에게 메모 API &nbsp;·&nbsp; 500자 초과 시 2개 메시지로 자동 분할</div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ─── 시스템 1: 주식 AI 브리핑 ─── -->
+<section>
+  <h2>📊 시스템 1 · 주식 AI 브리핑 <span class="badge badge-green">매일 09:30 KST</span></h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num num-blue">1</div>
+      <div class="step-body">
+        <div class="title">스케줄 트리거</div>
+        <div class="text">GitHub Actions가 매주 월~금 09:30 KST 자동 실행.<br>keepalive.yml이 매주 repo에 더미 커밋 → 휴면 방지.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num num-blue">2</div>
+      <div class="step-body">
+        <div class="title">시장 데이터 수집</div>
+        <div class="text">
+          <b>국내 (pykrx)</b>: 삼성전자·SK하이닉스·현대차·신한지주·KB금융<br>
+          <b>해외 (yfinance)</b>: SPYM·QQQM·SCHD·GOOGL·PLTR·TSLA·ETN·ANET·<b>SPCX</b> (신규 추가)<br>
+          기술지표: RSI 14 · MACD 12/26/9 · 볼린저밴드 20 자동 계산
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num num-purple">3</div>
+      <div class="step-body">
+        <div class="title">Groq AI 코멘터리 생성</div>
+        <div class="text">10년 경력 펀드매니저 역할 프롬프트로 시장 해석.<br>🎯 오늘의 포인트 · 👀 주목 종목 · ⚠️ 주의사항</div>
+        <pre><code>prompt = """당신은 10년 경력의 펀드매니저입니다. 150자 이내로
+오늘 시장 상황을 3가지 관점으로 분석해주세요:
+🎯 오늘의 포인트 / 👀 주목 종목 / ⚠️ 주의사항"""</code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num num-yellow">4</div>
+      <div class="step-body">
+        <div class="title">KakaoTalk 전송 (500자 자동 분할)</div>
+        <div class="text">기본 주식 메시지 + 코멘터리 합산이 490자 초과 시 2개 메시지로 분할 전송.</div>
+        <pre><code>if len(base_msg) + len(commentary) > 490:
+    send_kakao(base_msg)       # 메시지 1: 주식 데이터
+    send_kakao(commentary)     # 메시지 2: AI 코멘터리
+else:
+    send_kakao(base_msg + commentary)</code></pre>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ─── 시스템 2: BioLog 자동저장 ─── -->
+<section>
+  <h2>🧬 시스템 2 · BioLog GitHub 자동저장 <span class="badge badge-blue">실시간</span></h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num num-blue">1</div>
+      <div class="step-body">
+        <div class="title">PAT (Personal Access Token) 발급</div>
+        <div class="text">
+          GitHub → Settings → Developer settings → Fine-grained tokens<br>
+          권한: <b>Contents (Read &amp; Write)</b> · 대상 repo: portfolio-dashboard<br>
+          토큰은 biolog.html 내 localStorage에만 저장 (서버 전송 없음)
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num num-blue">2</div>
+      <div class="step-body">
+        <div class="title">데이터 입력 → 자동 커밋</div>
+        <div class="text">+ 저장 버튼 클릭 시 GitHub REST API PUT 호출.</div>
+        <pre><code>// UTF-8 안전 base64 인코딩 (한글 포함)
+const encoded = btoa(unescape(encodeURIComponent(json)));
+
+await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${GH_PATH}`, {
+  method: "PUT",
+  headers: { Authorization: `Bearer ${token}` },
+  body: JSON.stringify({
+    message: `feat: biolog update ${date}`,
+    content: encoded,
+    sha: fileInfo.sha   // 기존 파일 SHA 필수
+  })
+});</code></pre>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num num-green">3</div>
+      <div class="step-body">
+        <div class="title">페이지 열 때 자동 불러오기</div>
+        <div class="text">GitHub에서 최신 biolog_data.json 자동 GET → 로컬 데이터와 날짜 기준 병합.</div>
+        <pre><code>const decoded = decodeURIComponent(escape(atob(fileInfo.content.replace(/\n/g,""))));
+const parsed  = JSON.parse(decoded);</code></pre>
+      </div>
+    </div>
+  </div>
+  <div class="tip">✅ GitHub Desktop push 없이 웹에서 직접 저장 · 어떤 기기에서도 항상 최신 데이터 동기화</div>
+</section>
+
+<hr>
+
+<!-- ─── 시스템 3: 주간 BioLog 분석 ─── -->
+<section>
+  <h2>🤖 시스템 3 · BioLog 주간 AI 분석 <span class="badge badge-purple">매주 일요일 07:00</span></h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num num-blue">1</div>
+      <div class="step-body">
+        <div class="title">스케줄: biolog_analysis.yml</div>
+        <div class="text"><code>cron: '0 22 * * 6'</code> → 토요일 22:00 UTC = 일요일 07:00 KST</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num num-blue">2</div>
+      <div class="step-body">
+        <div class="title">최근 7일 데이터 로드</div>
+        <div class="text">biolog_data.json에서 날짜 정렬 후 최근 7개 엔트리 추출.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num num-purple">3</div>
+      <div class="step-body">
+        <div class="title">Groq AI 전문 분석</div>
+        <div class="text">
+          사용자 프로필 내장 프롬프트:<br>
+          테넬리아정(테네리글립틴+메트포르민 500mg) · 베르베린 · 새벽현상 · 고볼륨 풀ROM 훈련<br><br>
+          분석 항목: 혈당 패턴 · 운동-혈당 상관 · 수면 영향 · 취침 전 단백질 효과
+        </div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-num num-yellow">4</div>
+      <div class="step-body">
+        <div class="title">KakaoTalk 전송</div>
+        <div class="text">📊 총평 · 혈당/운동/수면 평가 · ✅ 잘한 점 · ⚡ 개선 포인트 · 💡 다음 주 권장사항</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr>
+
+<!-- ─── GitHub Secrets ─── -->
+<section>
+  <h2>🔑 GitHub Secrets 설정 목록 <span class="badge badge-yellow">SETTINGS</span></h2>
+  <table>
+    <tr><th>Secret 이름</th><th>내용</th><th>사용처</th></tr>
+    <tr><td>GROQ_API_KEY</td><td>Groq API 키 (console.groq.com)</td><td>portfolio.yml, biolog_analysis.yml</td></tr>
+    <tr><td>KAKAO_REFRESH_TOKEN</td><td>카카오 리프레시 토큰</td><td>portfolio.yml, biolog_analysis.yml</td></tr>
+    <tr><td>KAKAO_CLIENT_ID</td><td>카카오 앱 REST API 키</td><td>portfolio.yml, biolog_analysis.yml</td></tr>
+    <tr><td>KAKAO_CLIENT_SECRET</td><td>카카오 앱 Client Secret</td><td>portfolio.yml, biolog_analysis.yml</td></tr>
+  </table>
+  <div class="warn">⚠️ API 키는 절대 코드에 직접 입력하지 말 것. GitHub Secrets에만 저장하고 코드에서는 <code>os.environ["KEY"]</code>로 참조.</div>
+</section>
+
+<hr>
+
+<!-- ─── 파일 구조 ─── -->
+<section>
+  <h2>📁 주요 파일 구조</h2>
+  <pre><code>portfolio-dashboard/
+├── biolog.html                    # BioLog 웹 대시보드 (GitHub API 자동저장 내장)
+├── biolog_data.json               # BioLog 데이터 (웹에서 자동 커밋됨)
+├── biolog_weekly_analysis.py      # 주간 AI 분석 스크립트
+├── portfolio_prices.py            # 주식 수집 + AI 코멘터리 스크립트
+├── requirements.txt               # Python 패키지 (pykrx, yfinance, requests 등)
+├── push_fix.bat                   # 수동 커밋 보조 배치파일
+└── .github/workflows/
+    ├── portfolio.yml              # 매일 09:30 KST 주식 브리핑
+    ├── biolog_analysis.yml        # 매주 일요일 07:00 KST 건강 분석
+    └── keepalive.yml              # 매주 repo 활성화 유지</code></pre>
+</section>
+
+<hr>
+
+<div style="text-align:center; font-size:11px; color:#484f58; padding-bottom:20px;">
+  Built 2026-06-18 &nbsp;·&nbsp; youngmoneykor-bit/portfolio-dashboard &nbsp;·&nbsp; Powered by Groq + GitHub Actions
+</div>
+
+</body>
+</html>
