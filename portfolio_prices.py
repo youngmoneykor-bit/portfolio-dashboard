@@ -56,10 +56,59 @@ def calc_bb(series, period=20):
     std = series.rolling(period).std()
     return ma.iloc[-1], (ma + 2 * std).iloc[-1], (ma - 2 * std).iloc[-1]
 
-def generate_comment(close_series):
+def calc_bb_bandwidth(series, period=20):
+    """Bollinger Bandwidth = (Upper - Lower) / MA * 100  — 밴드 수축/확장 측정"""
+    ma  = series.rolling(period).mean()
+    std = series.rolling(period).std()
+    bw  = ((ma + 2*std) - (ma - 2*std)) / ma * 100
+    return bw.iloc[-1]
+
+def calc_adx(high, low, close, period=14):
+    """ADX — 추세 강도 (Wilder 평활화)
+    ADX >= 25: 추세장 (BB 터치 = 추세 가속 신호)
+    ADX <  20: 횡보장 (BB 터치 = 평균회귀 신호)
+    """
+    try:
+        high  = pd.Series(high.values if hasattr(high, 'values') else high)
+        low   = pd.Series(low.values  if hasattr(low,  'values') else low)
+        close = pd.Series(close.values if hasattr(close, 'values') else close)
+
+        prev_close = close.shift(1)
+        tr = pd.concat([
+            high - low,
+            (high - prev_close).abs(),
+            (low  - prev_close).abs()
+        ], axis=1).max(axis=1)
+
+        up   = high.diff()
+        down = -low.diff()
+        plus_dm  = pd.Series(0.0, index=up.index)
+        minus_dm = pd.Series(0.0, index=up.index)
+        mask_p = (up > down) & (up > 0)
+        mask_n = (down > up) & (down > 0)
+        plus_dm[mask_p]  = up[mask_p]
+        minus_dm[mask_n] = down[mask_n]
+
+        alpha  = 1 / period
+        tr_s   = tr.ewm(alpha=alpha, adjust=False).mean()
+        pdm_s  = plus_dm.ewm(alpha=alpha, adjust=False).mean()
+        ndm_s  = minus_dm.ewm(alpha=alpha, adjust=False).mean()
+
+        pdi = 100 * pdm_s / tr_s.replace(0, float("nan"))
+        ndi = 100 * ndm_s / tr_s.replace(0, float("nan"))
+        dx  = 100 * (pdi - ndi).abs() / (pdi + ndi).replace(0, float("nan"))
+        adx = dx.ewm(alpha=alpha, adjust=False).mean()
+
+        return adx.iloc[-1]
+    except:
+        return float("nan")
+
+def generate_comment(close_series, high_series=None, low_series=None):
     if len(close_series) < 30:
         return "데이터 부족"
     comments = []
+
+    # ── RSI ──
     try:
         rsi = calc_rsi(close_series)
         if not math.isnan(rsi):
@@ -69,19 +118,64 @@ def generate_comment(close_series):
             elif rsi <= 30: comments.append(f"RSI {rsi:.0f} 과매도 구간")
             else:           comments.append(f"RSI {rsi:.0f} 중립")
     except: pass
+
+    # ── MACD ──
     try:
         macd, sig = calc_macd(close_series)
         comments.append("MACD 상승 추세" if macd > sig else "MACD 하락 추세")
     except: pass
+
+    # ── Bollinger + ADX 국면 판단 ──
     try:
         price = close_series.iloc[-1]
         _, upper, lower = calc_bb(close_series)
         pos = (price - lower) / (upper - lower) if (upper - lower) > 0 else 0.5
-        if pos >= 0.95:   comments.append("볼린저 상단 돌파")
-        elif pos >= 0.80: comments.append("볼린저 상단 근접")
-        elif pos <= 0.05: comments.append("볼린저 하단 이탈")
-        elif pos <= 0.20: comments.append("볼린저 하단 근접")
+        bw  = calc_bb_bandwidth(close_series)
+
+        # ADX로 시장 국면 결정
+        regime = "unknown"
+        if high_series is not None and low_series is not None:
+            adx = calc_adx(high_series, low_series, close_series)
+            if not math.isnan(adx):
+                if adx >= 25:  regime = "trend"   # 추세장
+                elif adx < 20: regime = "range"   # 횡보장
+                else:          regime = "neutral"  # 중립 (20~25)
+
+        # BB 위치 × 국면 해석
+        if pos >= 0.95:
+            if regime == "trend":
+                comments.append("BB상단 돌파(추세장·가속)")
+            elif regime == "range":
+                comments.append("BB상단 돌파(횡보·과매수 주의)")
+            else:
+                comments.append("BB상단 돌파")
+        elif pos >= 0.80:
+            if regime == "trend":
+                comments.append("BB상단 근접(추세 지속)")
+            elif regime == "range":
+                comments.append("BB상단 근접(평균회귀 가능)")
+            else:
+                comments.append("BB상단 근접")
+        elif pos <= 0.05:
+            if regime == "trend":
+                comments.append("BB하단 이탈(하락 추세 가속)")
+            elif regime == "range":
+                comments.append("BB하단 이탈(횡보·반등 기대)")
+            else:
+                comments.append("BB하단 이탈")
+        elif pos <= 0.20:
+            if regime == "trend":
+                comments.append("BB하단 근접(하락 추세)")
+            elif regime == "range":
+                comments.append("BB하단 근접(매수 타이밍 접근)")
+            else:
+                comments.append("BB하단 근접")
+
+        # 밴드폭 스퀴즈 — 변동성 집중 경보
+        if not math.isnan(bw) and bw < 8:
+            comments.append(f"BB스퀴즈(밴드폭{bw:.1f}%·변동성 집중)")
     except: pass
+
     return "  |  ".join(comments[:3]) if comments else "-"
 
 # ── 데이터 수집 ───────────────────────────────────────
@@ -99,7 +193,7 @@ def get_kr_data():
             row["prev"]    = int(df["종가"].iloc[-2])
             row["change"]  = row["price"] - row["prev"]
             row["pct"]     = df["등락률"].iloc[-1]
-            row["comment"] = generate_comment(df["종가"])
+            row["comment"] = generate_comment(df["종가"], df["고가"], df["저가"])
         except: row["comment"] = "조회 오류"
         rows.append(row)
     return rows
@@ -110,13 +204,16 @@ def get_us_data():
         row = {"ticker": ticker,
                "price": None, "prev": None, "change": None, "pct": None, "comment": "-"}
         try:
-            close = yf.Ticker(ticker).history(period="6mo")["Close"]
+            hist  = yf.Ticker(ticker).history(period="6mo")
+            close = hist["Close"]
+            high  = hist["High"]
+            low   = hist["Low"]
             if len(close) < 2: rows.append(row); continue
             row["price"]   = close.iloc[-1]
             row["prev"]    = close.iloc[-2]
             row["change"]  = row["price"] - row["prev"]
             row["pct"]     = (row["change"] / row["prev"]) * 100
-            row["comment"] = generate_comment(close)
+            row["comment"] = generate_comment(close, high, low)
         except: row["comment"] = "조회 오류"
         rows.append(row)
     return rows
@@ -310,7 +407,7 @@ th:first-child,th:last-child{{text-align:left}}
 <div class="card"><h2>US Stocks — NYSE / NASDAQ</h2>
 <table><tr><th>티커</th><th>어제 종가</th><th>현재가</th><th>전일대비</th><th>등락률</th><th>기술적 분석</th></tr>
 {build_us_rows(us_data)}</table></div>
-<p class="footer">RSI 14 · MACD 12/26/9 · Bollinger 20 &nbsp;·&nbsp; pykrx &amp; yfinance &nbsp;·&nbsp; {now}</p>
+<p class="footer">RSI 14 · MACD 12/26/9 · Bollinger 20 · ADX 14 · BB Bandwidth &nbsp;·&nbsp; pykrx &amp; yfinance &nbsp;·&nbsp; {now}</p>
 </body></html>"""
 
 # ── 메인 ─────────────────────────────────────────────
