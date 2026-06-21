@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="ko"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Portfolio Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f1117;color:#e0e0e0;padding:28px 16px}
+h1{font-size:1.5rem;font-weight:700;color:#fff;margin-bottom:4px}
+.subtitle{font-size:.82rem;color:#555;margin-bottom:28px}
+.card{background:#1a1d27;border-radius:14px;padding:20px;border:1px solid #2a2d3a;margin-bottom:20px;max-width:1100px;margin-left:auto;margin-right:auto}
+.card h2{font-size:.85rem;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid #2a2d3a}
+table{width:100%;border-collapse:collapse}
+td{padding:9px 8px;font-size:.83rem;border-bottom:1px solid #1e2130;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+td.mono{font-family:'SF Mono','Fira Code',monospace;font-size:.8rem}
+td.right{text-align:right}
+tr.up td:first-child{border-left:3px solid #26c281}
+tr.down td:first-child{border-left:3px solid #e74c3c}
+tr td:first-child{border-left:3px solid transparent;padding-left:12px}
+.sub{color:#555;font-size:.72rem}
+.badge{display:inline-block;padding:3px 8px;border-radius:20px;font-size:.75rem;font-weight:600;white-space:nowrap}
+.badge.up{background:#0d3d27;color:#26c281}
+.badge.down{background:#3d1111;color:#e74c3c}
+.badge.flat{background:#222;color:#888}
+.comment{font-size:.75rem;color:#a0a0b0}
+th{color:#444;font-size:.72rem;font-weight:500;padding:6px 8px;text-align:right;border-bottom:1px solid #2a2d3a}
+th:first-child,th:last-child{text-align:left}
+.footer{text-align:center;margin-top:20px;font-size:.75rem;color:#333}
+</style></head><body>
+<h1>Portfolio Dashboard</h1>
+<p class="subtitle">기준 시각: 2026-06-21 23:40:21</p>
+<div class="card"><h2>KR Stocks — KRX</h2>
+<table><tr><th>종목</th><th>어제 종가</th><th>현재가</th><th>전일대비</th><th>등락률</th><th>기술적 분석</th></tr>
+<tr class="down">
+          <td><b>Samsung</b><br><span class="sub">005930</span></td>
+          <td class="mono right">&#8361;362,500</td><td class="mono right">&#8361;354,000</td>
+          <td class="mono right">-&#8361;8,500</td><td class="right"><span class="badge down">▼ 2.34%</span></td>
+          <td><span class="comment">RSI 62 중립  |  MACD 상승 추세  |  BB상단 근접(추세 지속)</span></td></tr><tr class="up">
+          <td><b>SK Hynix</b><br><span class="sub">000660</span></td>
+          <td class="mono right">&#8361;2,685,000</td><td class="mono right">&#8361;2,764,000</td>
+          <td class="mono right">+&#8361;79,000</td><td class="right"><span class="badge up">▲ 2.94%</span></td>
+          <td><span class="comment">RSI 74 과매수 구간  |  MACD 상승 추세  |  BB상단 돌파(추세장·가속)</span></td></tr><tr class="up">
+          <td><b>Hyundai</b><br><span class="sub">005380</span></td>
+          <td class="mono right">&#8361;601,000</td><td class="mono right">&#8361;613,000</td>
+          <td class="mono right">+&#8361;12,000</td><td class="right"><span class="badge up">▲ 2.00%</span></td>
+          <td><span class="comment">RSI 46 중립  |  MACD 하락 추세</span></td></tr><tr class="up">
+          <td><b>Shinhan</b><br><span class="sub">055550</span></td>
+          <td class="mono right">&#8361;100,800</td><td class="mono right">&#8361;100,900</td>
+          <td class="mono right">+&#8361;100</td><td class="right"><span class="badge up">▲ 0.10%</span></td>
+          <td><span class="comment">RSI 53 중립  |  MACD 상승 추세</span></td></tr><tr class="down">
+          <td><b>KB Finance</b><br><span class="sub">105560</span></td>
+          <td class="mono right">&#8361;163,100</td><td class="mono right">&#8361;158,300</td>
+          <td class="mono right">-&#8361;4,800</td><td class="right"><span class="badge down">▼ 2.94%</span></td>
+          <td><span class="comment">RSI 49 중립  |  MACD 상승 추세</span></td></tr></table></div>
+<div class="card"><h2>US Stocks — NYSE / NASDAQ</h2>
+<table><tr><th>티커</th><th>어제 종가</th><th>현재가</th><th>전일대비</th><th>등락률</th><th>기술적 분석</th></tr>
+<tr class="up">
+          <td><b>SPYM</b></td>
+          <td class="mono right">$87.00</td><td class="mono right">$87.89</td>
+          <td class="mono right">+$0.89</td><td class="right"><span class="badge up">▲ 1.02%</span></td>
+          <td><span class="comment">RSI 55 중립  |  MACD 하락 추세  |  BB스퀴즈(밴드폭4.9%·변동성 집중)</span></td></tr><tr class="up">
+          <td><b>QQQM</b></td>
+          <td class="mono right">$297.57</td><td class="mono right">$304.52</td>
+          <td class="mono right">+$6.95</td><td class="right"><span class="badge up">▲ 2.34%</span></td>
+          <td><span class="comment">RSI 59 중립  |  MACD 하락 추세</span></td></tr><tr class="down">
+          <td><b>SCHD</b></td>
+          <td class="mono right">$31.93</td><td class="mono right">$31.86</td>
+          <td class="mono right">-$0.07</td><td class="right"><span class="badge down">▼ 0.22%</span></td>
+          <td><span class="comment">RSI 43 중립  |  MACD 하락 추세  |  BB하단 이탈</span></td></tr><tr class="up">
+          <td><b>GOOGL</b></td>
+          <td class="mono right">$363.79</td><td class="mono right">$368.03</td>
+          <td class="mono right">+$4.24</td><td class="right"><span class="badge up">▲ 1.17%</span></td>
+          <td><span class="comment">RSI 49 중립  |  MACD 하락 추세</span></td></tr><tr class="down">
+          <td><b>PLTR</b></td>
+          <td class="mono right">$130.63</td><td class="mono right">$128.47</td>
+          <td class="mono right">-$2.16</td><td class="right"><span class="badge down">▼ 1.65%</span></td>
+          <td><span class="comment">RSI 41 중립  |  MACD 하락 추세</span></td></tr><tr class="up">
+          <td><b>TSLA</b></td>
+          <td class="mono right">$396.38</td><td class="mono right">$400.49</td>
+          <td class="mono right">+$4.11</td><td class="right"><span class="badge up">▲ 1.04%</span></td>
+          <td><span class="comment">RSI 47 중립  |  MACD 하락 추세</span></td></tr><tr class="up">
+          <td><b>ETN</b></td>
+          <td class="mono right">$409.64</td><td class="mono right">$421.77</td>
+          <td class="mono right">+$12.13</td><td class="right"><span class="badge up">▲ 2.96%</span></td>
+          <td><span class="comment">RSI 58 중립  |  MACD 상승 추세  |  BB상단 근접(평균회귀 가능)</span></td></tr><tr class="up">
+          <td><b>ANET</b></td>
+          <td class="mono right">$164.93</td><td class="mono right">$169.67</td>
+          <td class="mono right">+$4.74</td><td class="right"><span class="badge up">▲ 2.87%</span></td>
+          <td><span class="comment">RSI 59 중립  |  MACD 상승 추세</span></td></tr><tr class="down">
+          <td><b>SPCX</b></td>
+          <td class="mono right">$191.82</td><td class="mono right">$185.00</td>
+          <td class="mono right">-$6.82</td><td class="right"><span class="badge down">▼ 3.56%</span></td>
+          <td><span class="comment">데이터 부족</span></td></tr></table></div>
+<p class="footer">RSI 14 · MACD 12/26/9 · Bollinger 20 · ADX 14 · BB Bandwidth &nbsp;·&nbsp; pykrx &amp; yfinance &nbsp;·&nbsp; 2026-06-21 23:40:21</p>
+</body></html>
