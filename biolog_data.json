@@ -1,6 +1,6 @@
 {
-  "exported_at": "2026-06-24T07:55:57.229Z",
-  "count": 14,
+  "exported_at": "2026-06-24T07:57:20.976Z",
+  "count": 15,
   "entries": [
     {
       "date": "2026-05-31",
@@ -183,6 +183,19 @@
       "fastingPlan": "평소",
       "condition": 4,
       "notes": "전날 초고강도 하체운동 / 당일 완전 휴식"
+    },
+    {
+      "date": "2026-06-23",
+      "glucose": "120",
+      "prevRpe": 3,
+      "prevType": "저강도 유산소",
+      "todayRpe": 6,
+      "todayType": "중강도",
+      "sleepHours": "7.5",
+      "protein": "유청+카제인",
+      "fastingPlan": "평소",
+      "condition": 4,
+      "notes": "상체 가슴,삼두 수행 / 슬로우 조깅 25분"
     }
   ]
 }
