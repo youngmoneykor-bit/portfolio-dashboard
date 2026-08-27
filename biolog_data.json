@@ -1,6 +1,6 @@
 {
-  "exported_at": "2026-06-24T08:01:00.872Z",
-  "count": 16,
+  "exported_at": "2026-08-27T06:08:14.858Z",
+  "count": 17,
   "entries": [
     {
       "date": "2026-05-31",
@@ -209,6 +209,19 @@
       "fastingPlan": "평소",
       "condition": 4,
       "notes": "어꺠만 수행 / 슬로우 조깅 30분"
+    },
+    {
+      "date": "2026-08-27",
+      "glucose": "98",
+      "prevRpe": 3,
+      "prevType": "저강도 유산소",
+      "todayRpe": 7,
+      "todayType": "중강도",
+      "sleepHours": "6.5",
+      "protein": "없음",
+      "fastingPlan": "평소",
+      "condition": 3,
+      "notes": "스퀏 70% / 5 x 5 진행 "
     }
   ]
 }
